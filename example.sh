@@ -18,6 +18,36 @@
 #                   atlasRelease.name="Allen Mouse CCF v2" \
 
 
+# regular query, just using a "not include" string operator
+# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+#               --nexus-token-file ./token.txt \
+#               --nexus-org bbp \
+#               --nexus-proj atlas \
+#               --out ./tmp/some_payload.json \
+#               --payload \
+#               --verbose \
+#               --filter \
+#                   type=BrainParcellationDataLayer \
+#                   resolution.value=10 \
+#                   bufferEncoding=gzip \
+#                   atlasRelease.name!="Allen Mouse CCF v2" \
+
+
+# Same but with case mistakes in prop names
+# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+#               --nexus-token-file ./token.txt \
+#               --nexus-org bbp \
+#               --nexus-proj atlas \
+#               --out ./tmp/some_payload.json \
+#               --payload \
+#               --verbose \
+#               --filter \
+#                   type=BrainparcellationDataLayer \
+#                   resOlution.value=10 \
+#                   Bufferencoding=gzip \
+#                   atlasRelease.name!="Allen Mouse CCF v2" \
+
+
 bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --nexus-token-file ./token.txt \
               --nexus-org bbp \
@@ -26,6 +56,5 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --payload \
               --verbose \
               --filter \
-                  type=BrainParcellationDataLayer \
-                  resolution.value=10 \
-                  atlasRelease.name!="Allen Mouse CCF v2" \
+                  type=CellPositions \
+                  brainLocation.brainRegion.label="Gigantocellular reticular nucleus" \

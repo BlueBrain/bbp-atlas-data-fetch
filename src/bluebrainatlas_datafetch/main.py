@@ -177,6 +177,11 @@ def translateFilters(args, context):
     interpreted_filters = []
     context_mappers = {}
 
+    # Create a LUT for context entries to match lowercase names
+    lowercase_context_lut = {}
+    for name in context:
+        lowercase_context_lut[name.lower()] = name
+
     # converting each filter...
     for given_filter in args.filter:
         # print("processing filter:", given_filter)
@@ -199,15 +204,15 @@ def translateFilters(args, context):
         # here, each prop will be preceded by "nsg:" or another context in use
         properties_with_mapping = []
         for prop in properties_no_mapping:
-            if prop in context:
-                prop_with_mapping = context[prop]["@id"]
+            lowercase_prop = prop.lower()
+            #if prop in context:
+            if lowercase_prop in lowercase_context_lut:
+                prop_with_mapping = context[lowercase_context_lut[lowercase_prop]]["@id"]
                 context_id = prop_with_mapping.split(":")[0]
                 context_mappers[context_id] = context[context_id]
                 properties_with_mapping.append(prop_with_mapping)
             else:
                 properties_with_mapping.append(UNKNOWN_CONTEXT_SHORT + prop)
-
-
 
         value = given_filter[symbol_position+len(symbol):]
         value_type = "string"
@@ -242,8 +247,9 @@ def translateFilters(args, context):
 
             # updating the field type
             smarter_filter["value_type"] = "type"
-            if smarter_filter["value"] in context:
-                smarter_filter["value"] = context[smarter_filter["value"]]["@id"]
+            lowercase_type = smarter_filter["value"].lower()
+            if lowercase_type in lowercase_context_lut:
+                smarter_filter["value"] = context[lowercase_context_lut[lowercase_type]]["@id"]
             else:
                 smarter_filter["value"] = UNKNOWN_CONTEXT_SHORT + smarter_filter["value"]
 
@@ -252,9 +258,12 @@ def translateFilters(args, context):
     return (interpreted_filters, context_mappers)
 
 
-def buildSparqlQuery(filters, context_mappers):
+def buildSparqlQuery(filters, context_mappers, context_when_no_context):
     q = ""
     select_var_name = "?s"
+
+    # add unknown prefix
+    q += "PREFIX {} <{}>\n".format(UNKNOWN_CONTEXT_SHORT, context_when_no_context)
 
     # add the prefixes
     for pref in context_mappers:
@@ -315,16 +324,23 @@ def getFilteredIds(args):
                 context = el
                 break
 
-    context_when_no_context = args.nexus_env + "resources/" + args.nexus_org + "/" + args.nexus_proj + "/_/"
+    context_when_no_context = args.nexus_env + "/resources/" + args.nexus_org + "/" + args.nexus_proj + "/_/"
 
     (filters, context_mappers) = translateFilters(args, context)
 
-    query = buildSparqlQuery(filters, context_mappers)
+    query = buildSparqlQuery(filters, context_mappers, context_when_no_context)
     separator = "---------------------------------------------------------------------------"
     logging.info("{}\nSPARQL Query:\n{}\n{}".format(separator, query, separator))
 
+    try:
+        result = nexus.views.query_sparql(args.nexus_org, args.nexus_proj, query = query)
+    except Exception as e:
+        logging.error("❌ {}".format(e))
+        if e.response.status_code == 400:
+            logging.info("📄 Here is the original server error message:")
+            logging.info(e.response.text.replace("\\n", "\n").replace("\\t", "\t"))
+        exit(1)
 
-    result = nexus.views.query_sparql(args.nexus_org, args.nexus_proj, query = query)
     logging.info("{}\nSPARQL Response:\n{}\n{}".format(separator, json.dumps(result, indent=2), separator))
 
     ids = []
