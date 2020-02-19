@@ -48,13 +48,14 @@
 #                   atlasRelease.name!="Allen Mouse CCF v2" \
 
 
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_payload.json \
-              --payload \
-              --verbose \
-              --filter \
-                  type=CellPositions \
-                  brainLocation.brainRegion.label="Gigantocellular reticular nucleus" \
+# fetch point cloud for brain region mba:1048
+# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+#               --nexus-token-file ./token.txt \
+#               --nexus-org bbp \
+#               --nexus-proj atlas \
+#               --out ./tmp/some_payload.json \
+#               --payload \
+#               --verbose \
+#               --filter \
+#                   type=CellPositions \
+#                   brainLocation.brainRegion~="1048" \

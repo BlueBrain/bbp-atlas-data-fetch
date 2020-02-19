@@ -148,7 +148,14 @@ def parse_args(args):
 
 
 def randomString(stringLength=5):
-    """Generate a random string of fixed length """
+    """Generate a random string of fixed length
+
+    Args:
+      stringLength ([int]): The length of the string to generate
+
+    Returns:
+      :string: The random string
+    """
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
@@ -170,6 +177,7 @@ def translateFilters(args, context):
                 "value": "Allen Mouse CCF v2",
                 "value_type": "string"
             }
+        return :tuple: (filter_datastructure, context_mappers)
     """
     # must be in the order from the most complex to the simplest
     filter_symbols = [">=", "<=", "!=", "~=", "="]
@@ -217,17 +225,20 @@ def translateFilters(args, context):
         value = given_filter[symbol_position+len(symbol):]
         value_type = "string"
 
-        # If the value happens to be a number, we convert in into a number
-        try:
-            value = float(value)
-            value_int = int(value)
-            # Checkinf if it's an int or a float, to make sure we dont end up
-            # with a trailing ".0" if the provided value is an int
-            if abs(value - value_int) < sys.float_info.epsilon:
-                value = value_int
-            value_type = "number"
-        except:
-            pass
+        # If the value happens to be a number, we convert in into a number,
+        # unless the operator is ~= which is reserved for string so we do not want
+        # to cast to number because we still want to use a regex on this one.
+        if symbol != "~=":
+            try:
+                value = float(value)
+                value_int = int(value)
+                # Check if it's an int or a float, to make sure we dont end up
+                # with a trailing ".0" if the provided value is an int
+                if abs(value - value_int) < sys.float_info.epsilon:
+                    value = value_int
+                value_type = "number"
+            except:
+                pass
 
         smarter_filter = {
             "id": randomString(),
@@ -259,6 +270,10 @@ def translateFilters(args, context):
 
 
 def buildSparqlQuery(filters, context_mappers, context_when_no_context):
+    """
+        Builds a SPARQL query
+    """
+
     q = ""
     select_var_name = "?s"
 
