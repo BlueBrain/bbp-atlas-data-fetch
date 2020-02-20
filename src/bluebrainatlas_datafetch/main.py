@@ -244,8 +244,6 @@ def translateFilters(args, context):
 
         properties_no_mapping = given_filter[:symbol_position].split(".")
 
-        print('debug:', context["dimension"])
-
         # here, each prop will be preceded by "nsg:" or another context in use
         properties_with_mapping = []
         for prop in properties_no_mapping:
@@ -271,6 +269,15 @@ def translateFilters(args, context):
 
         value = given_filter[symbol_position+len(symbol):]
         value_type = "string"
+
+        # A value can possibly use a preffix, such as in "mba:997" (Allen CCF brain region id)
+        # If this prefix is in the context, then it is replaced by the actual value
+        position_semicolon = value.find(":")
+        if position_semicolon > 0:
+            prefix = value[:position_semicolon]
+            prefix_lower = prefix.lower()
+            if prefix_lower in lowercase_context_lut:
+                value = context[lowercase_context_lut[prefix_lower]] + value[position_semicolon+1:]
 
         # If the value happens to be a number, we convert in into a number,
         # unless the operator is ~= which is reserved for string so we do not want
@@ -312,8 +319,6 @@ def translateFilters(args, context):
                 smarter_filter["value"] = UNKNOWN_CONTEXT_SHORT + smarter_filter["value"]
 
         interpreted_filters.append(smarter_filter)
-
-    print(interpreted_filters)
 
     return (interpreted_filters, context_mappers)
 
@@ -372,7 +377,6 @@ def buildSparqlQuery(filters, context_mappers, context_when_no_context):
 
 
 def getFilteredIds(args):
-
     # fetching the full context to lookup the context mappings
     context_payload = nexus.resources.fetch('neurosciencegraph', 'datamodels', 'https://neuroshapes.org')
 
