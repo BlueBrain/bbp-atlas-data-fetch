@@ -5,6 +5,7 @@
 """
 
 import argparse
+import re
 import sys
 import os
 import json
@@ -118,7 +119,7 @@ def parse_args(args):
         required=False,
         default=None,
         nargs='+',
-        help="OPTIONAL Filter the results properties (example: 'resolution.value=10 bufferEncoding=gzip'). Optional but necessary of --id is not provided."
+        help="OPTIONAL Filter the results properties (example: 'resolution.value=10 bufferEncoding=gzip'). Optional but necessary of --nexus-id is not provided."
     )
 
     parser.add_argument(
@@ -160,6 +161,40 @@ def randomString(stringLength=5):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 
+def extractListIndexFromPropName(prop_name):
+    """
+        A property name can refer to an position in a list, such as in "dimension[10]"
+        then, the '10' as well as the 'dimension' must be extracted.
+    """
+
+    regex = r"\[(\d+)\]$"
+    matches = re.search(regex, prop_name)
+
+    if matches:
+        group_num = 1
+        list_index = int(matches.group(group_num))
+        prop_name_without_index = prop_name[:matches.start(group_num)-1]
+        return (prop_name_without_index, list_index)
+    else:
+        return (prop_name, None)
+
+
+def createRestFirstSequence(list_index):
+    """
+        In RDF, an element of a @list is addressed with rdf:first and rdf:rest
+        This fuction builds a sequence of /rdf:rest/rdf:rest/.../rdf:first based
+        on the list_index provided.
+    """
+    rest = "/rdf:rest"
+    first = "/rdf:first"
+
+    if list_index is None:
+        return ''
+
+    return list_index * rest + first
+
+
+
 def translateFilters(args, context):
     """
         Convert the string filters into filters datastructure that are easier to understand
@@ -180,7 +215,7 @@ def translateFilters(args, context):
         return :tuple: (filter_datastructure, context_mappers)
     """
     # must be in the order from the most complex to the simplest
-    filter_symbols = [">=", "<=", "!=", "~=", "="]
+    filter_symbols = [">=", "<=", "!=", "~=", "=", ">", "<"]
 
     interpreted_filters = []
     context_mappers = {}
@@ -209,18 +244,30 @@ def translateFilters(args, context):
 
         properties_no_mapping = given_filter[:symbol_position].split(".")
 
+        print('debug:', context["dimension"])
+
         # here, each prop will be preceded by "nsg:" or another context in use
         properties_with_mapping = []
         for prop in properties_no_mapping:
-            lowercase_prop = prop.lower()
+            (prop_name, list_index) = extractListIndexFromPropName(prop)
+
+            if list_index is not None:
+                context_mappers["rdf"] = context["rdf"]
+
+            lowercase_prop = prop_name.lower()
+            prop_with_mapping = ''
+
             #if prop in context:
             if lowercase_prop in lowercase_context_lut:
                 prop_with_mapping = context[lowercase_context_lut[lowercase_prop]]["@id"]
                 context_id = prop_with_mapping.split(":")[0]
                 context_mappers[context_id] = context[context_id]
-                properties_with_mapping.append(prop_with_mapping)
             else:
-                properties_with_mapping.append(UNKNOWN_CONTEXT_SHORT + prop)
+                prop_with_mapping = UNKNOWN_CONTEXT_SHORT + prop_name
+
+            # adding /rdf:rest/rdf:first if necessary (when a prop name is given with [n] at the end)
+            prop_with_mapping = prop_with_mapping + createRestFirstSequence(list_index)
+            properties_with_mapping.append(prop_with_mapping)
 
         value = given_filter[symbol_position+len(symbol):]
         value_type = "string"
@@ -265,6 +312,8 @@ def translateFilters(args, context):
                 smarter_filter["value"] = UNKNOWN_CONTEXT_SHORT + smarter_filter["value"]
 
         interpreted_filters.append(smarter_filter)
+
+    print(interpreted_filters)
 
     return (interpreted_filters, context_mappers)
 

@@ -62,11 +62,6 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 ```
 
 
-- Fetch the distribution linked to a resource from payload properties (dynamic SPARQL query building):
-```
-c
-```
-
 - Some comparison operator don't play well with shell script and need to be framed with quote signs:
 ```
 bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
@@ -96,6 +91,22 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
                   atlasRelease.name="Allen Mouse CCF v2" \   
 ```
 
+- Fetching dataset with properties that are lists:
+```
+bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+              --nexus-token-file ./token.txt \
+              --nexus-org bbp \
+              --nexus-proj atlas \
+              --out ./tmp/some_payload.json \
+              --payload \
+              --verbose \
+              --filter \
+                  dimension[0].name=intensity \     # <-- dimension is a @list where each object has a name
+                  worldMatrix[0]=10 \               # <-- worldMatrix is a @list where each element is a number
+
+```
+
+
 - Fetch the point cloud file linked to the brain region `mba:1048`:
 ```
 bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
@@ -108,6 +119,10 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
                   type=CellPositions \
                   brainLocation.brainRegion~="1048" \
 ```
+
+
+
+
 For this one, the CLI still does not work with a filter like `brainLocation.brainRegion="mba:1048"` because `mba` is actually a variable.  Added to the `#TODO`.
 
 
