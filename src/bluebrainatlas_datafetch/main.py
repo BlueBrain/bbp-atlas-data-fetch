@@ -515,14 +515,30 @@ def main(args):
 
         # fetching the file
         file_id = resource["distribution"]["contentUrl"].split("/")[-1]
+        file_payload = None
+
+        # fetching just the payload of the file, to check first if the file hash is in sync with what is
+        # in the payload of the resource (distribution)
+        try:
+            file_payload = nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id)
+            logging.info("✅  File saved at {}".format(args.out))
+        except Exception as e:
+            logging.error("❌ {}".format(e))
+            exit(1)
+
+        # If hashes are different, it means the File has changed (new rev) and the resource was not
+        # updated accordingly, hence the metadata in the payload may be wrong.
+        if resource["distribution"]["digest"]["value"] != file_payload["_digest"]["_value"]:
+            logging.error("❌ Hash mismatch. The resource distribution is no longer in sync with the file resource.")
+            exit(1)
+
+        # fetching the actual file (no longer only the payload)
         try:
             nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id , out_filepath=args.out)
             logging.info("✅  File saved at {}".format(args.out))
         except Exception as e:
             logging.error("❌ {}".format(e))
             exit(1)
-
-
 
 
 def run():
