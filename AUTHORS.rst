@@ -2,4 +2,4 @@
 Contributors
 ============
 
-* jonathanlurie <lurie.jo@gmail.com>
+* jonathanlurie <jonathan.lurie@epfl.ch>
