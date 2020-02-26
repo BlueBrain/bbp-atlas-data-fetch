@@ -521,7 +521,6 @@ def main(args):
         # in the payload of the resource (distribution)
         try:
             file_payload = nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id)
-            logging.info("✅  File saved at {}".format(args.out))
         except Exception as e:
             logging.error("❌ {}".format(e))
             exit(1)
