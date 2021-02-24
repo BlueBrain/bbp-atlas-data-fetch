@@ -505,6 +505,8 @@ def main(args):
 
 
     # if we want the distribution file
+    if "distribution" in resource and isinstance(resource["distribution"], list):
+        resource["distribution"] = resource["distribution"][0]
     if "distribution" in resource and "contentUrl" in resource["distribution"]:
         linked_file_extension = resource["distribution"]["name"].split(".").pop().lower()
 
