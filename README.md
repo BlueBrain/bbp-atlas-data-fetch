@@ -47,6 +47,7 @@ This CLI write on disc one of the two depending on the arguments provided:
 - **--nexus-org bbp** - [single string] The name of the Nexu organization to look for a resource. Mandatory
 - **--nexus-id some_id_probably_uuid** - [single string] The @id of the Nexus resource to fetch. Optional, but necessary if **--filter** is not provided
 - **--payload** - [flag] Fetch the payload as a JSON file. Optional, the default behavior is to fetch the file linked by the _distribution.contentUrl_ property.
+- **--favor - [multiple string] Payload properties and values with the format <'properties:value'> (ex: 'name:1.json') which will be used to determine which file to choose when retrieving a distribution from a resource with multiple distributions. Optional
 - **--out /some/file.json** - [single string] Path to the output file to create. The extension has to be .json if the flag --payload is provided. Otherwise, the extension must be the same as the distant file. Mandatory
 - **--keep-meta** - [flag] if --payload is provided, the JSON file will not contain the Nexus/JSON-LD system properties. If this flag is provided, the system metadata are kept
 - **--rev n** - [number] The revision argument is mainly to be used along **--nexus-id** to fetch a specific revision of a given resource. Optional, fetches the last revision if not provided
@@ -107,6 +108,18 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --nexus-proj atlas \
               --out ./tmp/some_distribution.nrrd \              # <-- extension must be the same as distant file
               --nexus-id 7f85cd66-d212-4799-bb4c-0732b8534442
+```
+
+Fetch the distribution file corresponding to the favor argument among multiple distributions from a resource:
+```
+bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+              --nexus-token-file ./token.txt \
+              --nexus-org bbp \
+              --nexus-proj atlas \
+              --out ./tmp/some_payload.json \
+              --nexus-id http://bbp.epfl.ch/neurosciencegraph/ontologies/mba\
+              --favor "encodingFormat:application/ld+json" \
+              --verbose \
 ```
 
 - Fetch a resource payload properties (dynamic SPARQL query building):

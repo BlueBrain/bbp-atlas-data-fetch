@@ -84,6 +84,15 @@ def parse_args(args):
     )
 
     parser.add_argument(
+        "--favor",
+        dest="favor",
+        type=str,
+        required=False,
+        default=[],
+        nargs='+',
+        help="OPTIONAL Payload properties and values with the format <'properties:value'> (ex: 'name:1.json') which will be used to determine which file to choose when retrieving a resource with multiple distributions."
+    )
+    parser.add_argument(
         "--payload",
         dest="payload",
         action="store_true",
@@ -503,43 +512,83 @@ def main(args):
 
         exit(0)
 
-
     # if we want the distribution file
-    if "distribution" in resource and isinstance(resource["distribution"], list):
-        resource["distribution"] = resource["distribution"][0]
-    if "distribution" in resource and "contentUrl" in resource["distribution"]:
-        linked_file_extension = resource["distribution"]["name"].split(".").pop().lower()
+    if "distribution" in resource:
+        distribution = resource["distribution"]
+        if isinstance(resource["distribution"], list):
+            logging.info("Resource distribution property is a list. Therefore several files "\
+                         "are linked to it: ")
+            distrib_found = []
+            for distrib in resource["distribution"]:
+                logging.info(f"=> '{distrib['name']}'")
+                for favor in args.favor:
+                    prop_val_list = favor.split(":")
+                    if (prop_val_list[0] in distrib and 
+                        prop_val_list[1] == distrib[prop_val_list[0]]):
+                        distrib_found.append((favor,distrib))
+                        
+            if distrib_found:
+                distribution = distrib_found[0][1]
+                for distrib_favor in distrib_found:
+                    logging.info(f"--favor argument '{distrib_favor[0]}' corresponds to the "\
+                                 f"'{distrib_favor[1]['name']}' distribution.")                    
+                if len(distrib_found) > 1:
+                    logging.warning("⚠️  More than one distribution has a correspondance with "\
+                                    "the --favor arguments values.")
+                    logging.info("Fetching the first corresponding distribution with "\
+                                 f"'{distribution['name']}' as file name by default...")
+                else:
+                    logging.info(f"Fetching the corresponding distribution with "\
+                                 f"'{distribution['name']}' as file name...")
+                
+            else:
+                distribution = resource["distribution"][0]
+                if not args.favor:
+                    logging.warning("⚠️  --flavor argument has not been provided.")
+                else:
+                    logging.warning("⚠️  No distribution has a correspondance with a provided "\
+                                    "--favor argument.")
+                    logging.info("Fetching the first distribution with "\
+                                 f"'{distribution['name']}' as file name by default...")
+            
+        if "distribution" in resource and "contentUrl" in distribution:
+            linked_file_extension = distribution["name"].split(".").pop().lower()
 
-        # check that extension of distant file and the output is the same (case not sensitive)
-        if linked_file_extension != output_extension:
-            logging.error("❌ The provided output extension is .{} while the distant file extension is .{} - They must be the same. ".format(output_extension, linked_file_extension))
-            exit(1)
+            # check that extension of distant file and the output is the same (case not sensitive)
+            if linked_file_extension != output_extension:
+                logging.error(f"❌ The provided output extension is .{output_extension} "\
+                              f"while the distant file extension is .{linked_file_extension} "\
+                              "- They must be the same. ")
+                exit(1)
 
-        # fetching the file
-        file_id = resource["distribution"]["contentUrl"].split("/")[-1]
-        file_payload = None
+            # fetching the file
+            file_id = distribution["contentUrl"].split("/")[-1]
+            file_payload = None
+    
+            # fetching just the payload of the file, to check first if the file hash is in 
+            #sync with what is in the payload of the resource (distribution)
+            try:
+                file_payload = nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id)
+            except Exception as e:
+                logging.error(f"❌ {e}")
+                exit(1)
 
-        # fetching just the payload of the file, to check first if the file hash is in sync with what is
-        # in the payload of the resource (distribution)
-        try:
-            file_payload = nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id)
-        except Exception as e:
-            logging.error("❌ {}".format(e))
-            exit(1)
+            # If hashes are different, it means the File has changed (new rev) and the 
+            # resource was not updated accordingly, hence the metadata in the payload may 
+            # be wrong.
+            if distribution["digest"]["value"] != file_payload["_digest"]["_value"]:
+                logging.error("❌ Hash mismatch. The resource distribution is no longer "\
+                              "in sync with the file resource.")
+                exit(1)
 
-        # If hashes are different, it means the File has changed (new rev) and the resource was not
-        # updated accordingly, hence the metadata in the payload may be wrong.
-        if resource["distribution"]["digest"]["value"] != file_payload["_digest"]["_value"]:
-            logging.error("❌ Hash mismatch. The resource distribution is no longer in sync with the file resource.")
-            exit(1)
-
-        # fetching the actual file (no longer only the payload)
-        try:
-            nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id , out_filepath=args.out)
-            logging.info("✅  File saved at {}".format(args.out))
-        except Exception as e:
-            logging.error("❌ {}".format(e))
-            exit(1)
+            # fetching the actual file (no longer only the payload)
+            try:
+                nexus.files.fetch(args.nexus_org, args.nexus_proj, file_id , 
+                                  out_filepath=args.out)
+                logging.info(f"✅  File saved at {args.out}")
+            except Exception as e:
+                logging.error(f"❌ {e}")
+                exit(1)
 
 
 def run():
