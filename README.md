@@ -145,7 +145,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --out ./tmp/some_distribution.nrrd \
               --filter \
                   type=BrainParcellationDataLayer \
-                  "resolution.value=>10" \                # <-- if not framed with "...", the > symbol redirects the output
+                  "resolution.value>=10" \                # <-- if not framed with "...", the > symbol redirects the output
                   atlasRelease.name="Allen Mouse CCF v2" \
 ```
 
