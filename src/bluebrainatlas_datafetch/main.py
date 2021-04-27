@@ -257,7 +257,6 @@ def translateFilters(args, context):
         properties_with_mapping = []
         for prop in properties_no_mapping:
             (prop_name, list_index) = extractListIndexFromPropName(prop)
-
             if list_index is not None:
                 context_mappers["rdf"] = context["rdf"]
 
