@@ -1,7 +1,7 @@
 """
-    Download the file attached to a given resource from Nexus.
-    If no file is atatched and the output required is actually the payload,
-    then the output extension must be .json
+Download the file attached to a given resource from Nexus.
+If no file is atatched and the output required is actually the payload, then the 
+output extension must be .json
 """
 
 import argparse
@@ -73,7 +73,8 @@ def parse_args(args):
         dest="nexus_id",
         required=False,
         default=None,
-        help="The Nexus @id of the resource to fetch the linked file of (optional, but necessary if --filter is not provided)",
+        help="The Nexus @id of the resource to fetch the linked file of (optional, "
+        "but necessary if --filter is not provided)",
     )
 
     parser.add_argument("--out", dest="out", required=True, help="Output filepath")
@@ -85,20 +86,24 @@ def parse_args(args):
         required=False,
         default=[],
         nargs="+",
-        help="OPTIONAL Payload properties and values with the format <'properties:value'> (ex: 'name:1.json') which will be used to determine which file to choose when retrieving a resource with multiple distributions.",
+        help="OPTIONAL Payload properties and values with the format "
+        "<'properties:value'> (ex: 'name:1.json') which will be used to determine "
+        "which file to choose when retrieving a resource with multiple distributions.",
     )
     parser.add_argument(
         "--payload",
         dest="payload",
         action="store_true",
-        help="OPTIONAL Stores the payload instead of the distribution file attached (--out extension must be .json)",
+        help="OPTIONAL Stores the payload instead of the distribution file attached "
+        "(--out extension must be .json)",
     )
 
     parser.add_argument(
         "--keep-meta",
         dest="keep_meta",
         action="store_false",
-        help="OPTIONAL Keep Nexus metadata in the payload (only applies when the payload is fetched and not the distribution file)",
+        help="OPTIONAL Keep Nexus metadata in the payload (only applies when the "
+        "payload is fetched and not the distribution file)",
     )
 
     parser.add_argument(
@@ -123,7 +128,8 @@ def parse_args(args):
         required=False,
         default=None,
         nargs="+",
-        help="OPTIONAL Filter the results properties (example: 'resolution.value=10 bufferEncoding=gzip'). Optional but necessary of --nexus-id is not provided.",
+        help="OPTIONAL Filter the results properties (example: 'resolution.value=10 "
+        "bufferEncoding=gzip'). Optional but necessary of --nexus-id is not provided.",
     )
 
     parser.add_argument(
@@ -140,7 +146,8 @@ def parse_args(args):
 
     if not args.nexus_id and not args.filter:
         logging.error(
-            "❌ If the argument --filter is missing, the argument --nexus-id becomes mandatory."
+            "❌ If the argument --filter is missing, the argument --nexus-id becomes "
+            "mandatory."
         )
         exit(1)
 
@@ -266,15 +273,17 @@ def translateFilters(args, context):
             else:
                 prop_with_mapping = UNKNOWN_CONTEXT_SHORT + prop_name
 
-            # adding /rdf:rest/rdf:first if necessary (when a prop name is given with [n] at the end)
+            # adding /rdf:rest/rdf:first if necessary (when a prop name is given with
+            # [n] at the end)
             prop_with_mapping = prop_with_mapping + createRestFirstSequence(list_index)
             properties_with_mapping.append(prop_with_mapping)
 
-        value = given_filter[symbol_position + len(symbol) :]
+        value = given_filter[symbol_position + len(symbol):]
         value_type = "string"
 
-        # A value can possibly use a preffix, such as in "mba:997" (Allen CCF brain region id)
-        # If this prefix is in the context, then it is replaced by the actual value
+        # A value can possibly use a preffix, such as in "mba:997" (Allen CCF brain
+        # region id) If this prefix is in the context, then it is replaced by the
+        # actual value
         position_semicolon = value.find(":")
         if position_semicolon > 0:
             prefix = value[:position_semicolon]
@@ -282,7 +291,7 @@ def translateFilters(args, context):
             if prefix_lower in lowercase_context_lut:
                 value = (
                     context[lowercase_context_lut[prefix_lower]]
-                    + value[position_semicolon + 1 :]
+                    + value[position_semicolon + 1:]
                 )
 
         # If the value happens to be a number, we convert in into a number,
@@ -297,7 +306,7 @@ def translateFilters(args, context):
                 if abs(value - value_int) < sys.float_info.epsilon:
                     value = value_int
                 value_type = "number"
-            except:
+            except Exception:
                 pass
 
         smarter_filter = {
@@ -308,8 +317,8 @@ def translateFilters(args, context):
             "value_type": value_type,
         }
 
-        # special case of the "type" property, where we have to look up in the context for
-        # the mapping of the value (and not only of the property name)
+        # special case of the "type" property, where we have to look up in the context
+        # for the mapping of the value (and not only of the property name)
         if (
             len(smarter_filter["properties"]) == 1
             and smarter_filter["properties"][0] == context["type"]["@id"]
@@ -405,9 +414,10 @@ def getFilteredIds(args):
         "neurosciencegraph", "datamodels", "https://neuroshapes.org"
     )
 
-    # stealing the context from the context payload. Could be @context or an element of it if it
-    # happens to be a list. We just take the first one in this case. (not bulletproof but ssince this resource
-    # is under the control of DKE, we will know if it changes...)
+    # stealing the context from the context payload. Could be @context or an element of
+    # it if it happens to be a list. We just take the first one in this case. (not
+    # bulletproof but ssince this resource is under the control of DKE, we will know
+    # if it changes...)
     context = None
     if isinstance(context_payload["@context"], dict):
         context = context_payload["@context"]
@@ -501,8 +511,9 @@ def main(args):
 
     # We extract the payload as a json file
     if args.payload:
-        # If there is no file attached to the resource, we want to write the payload as a JSON
-        # output file. Though if the extension of the given output is not json, then we raise an error and quit.
+        # If there is no file attached to the resource, we want to write the payload as
+        # a JSON output file. Though if the extension of the given output is not json,
+        # then we raise an error and quit.
         if output_extension != "json":
             logging.error(
                 "❌ To save the payload, the extension of the file must be .json"
@@ -597,7 +608,8 @@ def main(args):
         if "distribution" in resource and "contentUrl" in distribution:
             linked_file_extension = distribution["name"].split(".").pop().lower()
 
-            # check that extension of distant file and the output is the same (case not sensitive)
+            # check that extension of distant file and the output is the same (case not
+            # sensitive)
             if linked_file_extension != output_extension:
                 logging.error(
                     f"❌ The provided output extension is .{output_extension} "
@@ -610,8 +622,8 @@ def main(args):
             file_id = distribution["contentUrl"].split("/")[-1]
             file_payload = None
 
-            # fetching just the payload of the file, to check first if the file hash is in
-            # sync with what is in the payload of the resource (distribution)
+            # fetching just the payload of the file, to check first if the file hash 
+            # is in sync with what is in the payload of the resource (distribution)
             try:
                 file_payload = nexus.files.fetch(
                     args.nexus_org, args.nexus_proj, file_id
@@ -621,8 +633,8 @@ def main(args):
                 exit(1)
 
             # If hashes are different, it means the File has changed (new rev) and the
-            # resource was not updated accordingly, hence the metadata in the payload may
-            # be wrong.
+            # resource was not updated accordingly, hence the metadata in the payload
+            # may be wrong.
             if distribution["digest"]["value"] != file_payload["_digest"]["_value"]:
                 logging.error(
                     "❌ Hash mismatch. The resource distribution is no longer "

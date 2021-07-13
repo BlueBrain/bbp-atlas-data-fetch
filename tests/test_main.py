@@ -29,12 +29,12 @@ def test_extractListIndexFromPropName():
     prop = "prop_name"
     (prop_name, list_index) = extractListIndexFromPropName(prop)
     assert prop_name == "prop_name"
-    assert list_index == None
+    assert list_index is None
 
     prop = "prop_name['not_an_int']"
     (prop_name, list_index) = extractListIndexFromPropName(prop)
     assert prop_name == "prop_name['not_an_int']"
-    assert list_index == None
+    assert list_index is None
 
     prop = []
     with pytest.raises(TypeError) as e:
@@ -80,7 +80,8 @@ def test_buildSparqlQuery():
     result = buildSparqlQuery(filters, context, context_when_no_context)
     assert (
         result == "PREFIX unknown: <staging/resources/bbp/atlas/_/>\n"
-        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': {'@id': "
+        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': "
+        "{'@id': "
         "'prov:Property_2'}}>\n"
         "SELECT ?s\n"
         "WHERE {\n"
@@ -108,7 +109,8 @@ def test_buildSparqlQuery():
     result = buildSparqlQuery(filters, context, context_when_no_context)
     assert (
         result == "PREFIX unknown: <staging/resources/bbp/atlas/_/>\n"
-        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': {'@id': "
+        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': "
+        "{'@id': "
         "'prov:Property_2'}}>\n"
         "SELECT ?s\n"
         "WHERE {\n"
@@ -122,7 +124,8 @@ def test_buildSparqlQuery():
     result = buildSparqlQuery(filters, context, context_when_no_context)
     assert (
         result == "PREFIX unknown: <staging/resources/bbp/atlas/_/>\n"
-        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': {'@id': "
+        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': "
+        "{'@id': "
         "'prov:Property_2'}}>\n"
         "SELECT ?s\n"
         "WHERE {\n}"
@@ -131,7 +134,8 @@ def test_buildSparqlQuery():
     context_when_no_context = None
     assert (
         result == "PREFIX unknown: <staging/resources/bbp/atlas/_/>\n"
-        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': {'@id': "
+        "PREFIX @context: <{'Property_1': {'@id': 'nsg:Property_1'}, 'Property_2': "
+        "{'@id': "
         "'prov:Property_2'}}>\n"
         "SELECT ?s\n"
         "WHERE {\n}"
