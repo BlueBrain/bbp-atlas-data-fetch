@@ -14,7 +14,7 @@ import random
 import logging
 import nexussdk as nexus
 
-from bluebrainatlas_datafetch import __version__
+from bba_data_fetch import __version__
 
 __author__ = "Jonathan Lurie"
 __copyright__ = "EPFL - The Blue Brain Project"

@@ -1,5 +1,5 @@
 # Fetch a resource of a given @id:
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --nexus-token-file ./token.txt \
               --nexus-org bbp \
               --nexus-proj atlas \
@@ -7,7 +7,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
               --nexus-id "https://bbp.epfl.ch/neurosciencegraph/data/7b4b36ad-911c-4758-8686-2bf7943e10fb"
 
 # Fetch a resource that matches various propertiy values:
-# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+# bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #               --nexus-token-file ./token.txt \
 #               --nexus-org bbp \
 #               --nexus-proj atlas \
@@ -21,7 +21,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 
 
 # regular query, just using a "not include" string operator
-# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+# bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #               --nexus-token-file ./token.txt \
 #               --nexus-org bbp \
 #               --nexus-proj atlas \
@@ -36,7 +36,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 
 
 # Same but with case mistakes in prop names
-# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+# bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #               --nexus-token-file ./token.txt \
 #               --nexus-org bbp \
 #               --nexus-proj atlas \
@@ -50,7 +50,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #                   atlasRelease.name!="Allen Mouse CCF v2" \
 
 # fetch point cloud for brain region mba:1048
-# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+# bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #               --nexus-token-file ./token.txt \
 #               --nexus-org bbp \
 #               --nexus-proj atlas \
@@ -62,7 +62,7 @@ bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #                   brainLocation.brainRegion~="1048" \
 
 # fetch point cloud for brain region mba:1048
-# bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+# bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
 #               --nexus-token-file ./token.txt \
 #               --nexus-org bbp \
 #               --nexus-proj atlas \

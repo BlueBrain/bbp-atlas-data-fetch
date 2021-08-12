@@ -1,6 +1,6 @@
 import pytest
 import requests
-from bluebrainatlas_datafetch.main import (
+from bba_data_fetch.main import (
     randomString,
     extractListIndexFromPropName,
     createRestFirstSequence,

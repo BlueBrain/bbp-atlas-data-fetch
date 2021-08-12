@@ -10,12 +10,12 @@ There is mainly two ways of fetching a piece of data:
 When using filters (see below), a SPARQL query is dynamically generated, allowing graph traversal.
 
 ## Source
-You can find the source of this module here: [https://bbpcode.epfl.ch/code/#/admin/projects/dke/blue_brain_atlas_data_fetch](https://bbpcode.epfl.ch/code/#/admin/projects/dke/blue_brain_atlas_data_fetch)
+You can find the source of this module here: [https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch)
 
 ## Install
 Clone the repository:
 ```
-git clone https://lurie@bbpcode.epfl.ch/code/a/dke/blue_brain_atlas_data_fetch
+git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git
 ```
 
 And install with pip:
@@ -91,94 +91,94 @@ Under the hood, this is using _rdf:first_ and _rdf:rest_.
 ## Examples
 - Fetch a resource payload from its `@id`:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --payload \                                       # <-- to fetch the payload !
-              --out ./tmp/some_payload.json \                   # <-- needs a .json extension
-              --nexus-id 7f85cd66-d212-4799-bb4c-0732b8534442
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --payload \                                       # <-- to fetch the payload !
+               --out ./tmp/some_payload.json \                   # <-- needs a .json extension
+               --nexus-id 7f85cd66-d212-4799-bb4c-0732b8534442
 ```
 
 - Fetch the distribution file linked a resource, from resource `@id`:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_distribution.nrrd \              # <-- extension must be the same as distant file
-              --nexus-id 7f85cd66-d212-4799-bb4c-0732b8534442
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --out ./tmp/some_distribution.nrrd \              # <-- extension must be the same as distant file
+               --nexus-id 7f85cd66-d212-4799-bb4c-0732b8534442
 ```
 
 Fetch the distribution file corresponding to the favor argument among multiple distributions from a resource:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_payload.json \
-              --nexus-id http://bbp.epfl.ch/neurosciencegraph/ontologies/mba\
-              --favor "encodingFormat:application/ld+json" \
-              --verbose \
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --out ./tmp/some_payload.json \
+               --nexus-id http://bbp.epfl.ch/neurosciencegraph/ontologies/mba\
+               --favor "encodingFormat:application/ld+json" \
+               --verbose \
 ```
 
 - Fetch a resource payload properties (dynamic SPARQL query building):
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --payload \                                       # <-- to fetch the payload !
-              --out ./tmp/some_payload.json \                   # <-- needs a .json extension
-              --filter \
-                  type=BrainParcellationDataLayer \
-                  resolution.value=10 \
-                  atlasRelease.name="Allen Mouse CCF v2" \
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --payload \                                       # <-- to fetch the payload !
+               --out ./tmp/some_payload.json \                   # <-- needs a .json extension
+               --filter \
+                   type=BrainParcellationDataLayer \
+                   resolution.value=10 \
+                   atlasRelease.name="Allen Mouse CCF v2" \
 ```
 
 - Some comparison operator don't play well with shell script and need to be framed with quote signs:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_distribution.nrrd \
-              --filter \
-                  type=BrainParcellationDataLayer \
-                  "resolution.value>=10" \                # <-- if not framed with "...", the > symbol redirects the output
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --out ./tmp/some_distribution.nrrd \
+               --filter \
+                   type=BrainParcellationDataLayer \
+                   "resolution.value>=10" \                # <-- if not framed with "...", the > symbol redirects the output
                   atlasRelease.name="Allen Mouse CCF v2" \
 ```
 
 - Case insensitive for property and type names:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_payload.json \
-              --payload \
-              --verbose \
-              --filter \
-                  type=BrainParcellationDataLayer \
-                  resOlution.value=10 \                      # <-- wrong case spelling, still works!
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --out ./tmp/some_payload.json \
+               --payload \
+               --verbose \
+               --filter \
+                   type=BrainParcellationDataLayer \
+                   resOlution.value=10 \                      # <-- wrong case spelling, still works!
                   Bufferencoding=gzip \                      # <-- wrong case spelling, still works!
                   atlasRelease.name="Allen Mouse CCF v2" \
 ```
 
 - Fetch the point cloud file linked to the brain region _`mba:1048`_:
 ```
-bba-datafetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
-              --nexus-token-file ./token.txt \
-              --nexus-org bbp \
-              --nexus-proj atlas \
-              --out ./tmp/some_payload.raw \
-              --verbose \
-              --filter \
-                  type=CellPositions \
-                  brainLocation.brainRegion="mba:1048" \
+bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
+               --nexus-token-file ./token.txt \
+               --nexus-org bbp \
+               --nexus-proj atlas \
+               --out ./tmp/some_payload.raw \
+               --verbose \
+               --filter \
+                   type=CellPositions \
+                   brainLocation.brainRegion="mba:1048" \
 ```
 
 Note that _mba:1048_ is the id of a brain region (Allen CCF 1048 is the gigantocellular reticular nucleus) preceded by _mba_, which is the prefix in the graph database (_mba_=mouse brain atlas). This means that prefixes can be used in values if need be.
 
 ## Maintainers
-This module was originally created by Jonathan Lurie, DKE (jonathan.lurie@epfl.ch).
+This module was originally created by Jonathan Lurie, DKE (jonathan.lurie@epfl.ch) and Nabil Alibou, DKE (nabil.alibou@epfl.ch).
