@@ -278,7 +278,7 @@ def translateFilters(args, context):
             prop_with_mapping = prop_with_mapping + createRestFirstSequence(list_index)
             properties_with_mapping.append(prop_with_mapping)
 
-        value = given_filter[symbol_position + len(symbol) :]
+        value = given_filter[symbol_position + len(symbol):]
         value_type = "string"
 
         # A value can possibly use a preffix, such as in "mba:997" (Allen CCF brain
@@ -291,7 +291,7 @@ def translateFilters(args, context):
             if prefix_lower in lowercase_context_lut:
                 value = (
                     context[lowercase_context_lut[prefix_lower]]
-                    + value[position_semicolon + 1 :]
+                    + value[position_semicolon + 1:]
                 )
 
         # If the value happens to be a number, we convert in into a number,
