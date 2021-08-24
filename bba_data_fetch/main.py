@@ -37,7 +37,7 @@ def parse_args(args):
     parser.add_argument(
         "--version",
         action="version",
-        version="bluebrainatlas-datafetch {ver}".format(ver=__version__),
+        version=f"bba-data-fetch {__version__}"
     )
 
     parser.add_argument(
