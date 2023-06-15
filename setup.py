@@ -14,6 +14,7 @@ setup(
         "click>=7.0",
         "numpy>=1.19",
         "pynrrd>=0.4.0",
+        "nexusforge",
     ],
     extras_require={
         "dev": ["pytest>=4.3", "pytest-cov==2.10.0"],

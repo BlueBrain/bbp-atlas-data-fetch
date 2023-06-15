@@ -14,6 +14,8 @@ import random
 import logging
 import nexussdk as nexus
 
+from kgforge.core import KnowledgeGraphForge
+
 from bba_data_fetch import __version__
 
 __author__ = "Jonathan Lurie"
@@ -48,6 +50,14 @@ def parse_args(args):
     )
 
     parser.add_argument(
+        "--forge-config",
+        dest="forge_config",
+        required=False,
+        default="cfg/forge-config.yml",
+        help="Path to Nexus forge configuration",
+    )
+
+    parser.add_argument(
         "--nexus-env",
         dest="nexus_env",
         required=True,
@@ -75,6 +85,15 @@ def parse_args(args):
         default=None,
         help="The Nexus @id of the resource to fetch the linked file of (optional, "
         "but necessary if --filter is not provided)",
+    )
+
+    parser.add_argument(
+        "--cross-bucket",
+        dest="cross_bucket",
+        required=False,
+        default=True,
+        help="Option to search the resource id in buckets different from 'org/proj' "
+        "(optional, defauls to True)",
     )
 
     parser.add_argument("--out", dest="out", required=True, help="Output filepath")
@@ -495,9 +514,11 @@ def main(args):
 
     # Fetching the resource of interest
     try:
-        resource = nexus.resources.fetch(
-            args.nexus_org, args.nexus_proj, id, rev=args.nexus_rev, tag=args.nexus_tag
-        )
+        bucket = "/".join([args.nexus_org, args.nexus_proj])
+        forge = KnowledgeGraphForge(args.forge_config, endpoint=args.nexus_env,
+                                    bucket=bucket, token=args.nexus_token)
+        res = forge.retrieve(id, cross_bucket=args.cross_bucket)
+        resource = forge.as_json(res)
     except Exception as e:
         logging.error("❌ {}".format(e))
         exit(1)
@@ -620,14 +641,17 @@ def main(args):
 
             # fetching the file
             file_id = distribution["contentUrl"].split("/")[-1]
+            # with 'cross_bucket=True', the file bucket may be different from org/proj
+            fields = res._store_metadata._project.split("/")
+            file_org = fields[-2]
+            file_project = fields[-1]
             file_payload = None
 
             # fetching just the payload of the file, to check first if the file hash
             # is in sync with what is in the payload of the resource (distribution)
             try:
                 file_payload = nexus.files.fetch(
-                    args.nexus_org, args.nexus_proj, file_id
-                )
+                    file_org, file_project, file_id)
             except Exception as e:
                 logging.error(f"❌ {e}")
                 exit(1)
@@ -645,8 +669,7 @@ def main(args):
             # fetching the actual file (no longer only the payload)
             try:
                 nexus.files.fetch(
-                    args.nexus_org, args.nexus_proj, file_id, out_filepath=args.out
-                )
+                    file_org, file_project, file_id, out_filepath=args.out)
                 logging.info(f"✅  File saved at {args.out}")
             except Exception as e:
                 logging.error(f"❌ {e}")

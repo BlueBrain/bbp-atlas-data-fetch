@@ -306,3 +306,24 @@ def test_main():
     with pytest.raises(requests.exceptions.MissingSchema) as e:
         main(list_of_args)
     assert "Invalid URL" in str(e.value)
+
+    list_of_args = [
+        "--nexus-token",
+        "",
+        "--forge-config",
+        "cfg/forge-config.yml",
+        "--nexus-env",
+        "env/",
+        "--nexus-org",
+        "org",
+        "--nexus-proj",
+        "proj",
+        "--out",
+        "tests/",
+        "--nexus-id",
+        "id",
+    ]
+
+    with pytest.raises(SystemExit) as e:
+        main(list_of_args)
+    assert e.value.code == 1
