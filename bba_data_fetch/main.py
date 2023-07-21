@@ -14,6 +14,8 @@ import random
 import logging
 import nexussdk as nexus
 
+from urllib.parse import unquote
+
 from kgforge.core import KnowledgeGraphForge
 
 from bba_data_fetch import __version__
@@ -640,7 +642,9 @@ def main(args):
                 exit(1)
 
             # fetching the file
-            file_id = distribution["contentUrl"].split("/")[-1]
+            # as of nexusforge 0.8.1, the distribution.contentUrl may contain "%2F"
+            raw_contentUrl = unquote(distribution["contentUrl"])
+            file_id = raw_contentUrl.split("/")[-1]
             # with 'cross_bucket=True', the file bucket may be different from org/proj
             fields = res._store_metadata._project.split("/")
             file_org = fields[-2]
