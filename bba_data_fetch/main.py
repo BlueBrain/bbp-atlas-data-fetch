@@ -641,14 +641,15 @@ def main(args):
                 )
                 exit(1)
 
+            # with 'cross_bucket=True', the file bucket may be different from org/proj
+            separator = "/"
+            fields = res._store_metadata._project.split(separator)
+            file_org = fields[-2]
+            file_project = fields[-1]
             # fetching the file
             # as of nexusforge 0.8.1, the distribution.contentUrl may contain "%2F"
             raw_contentUrl = unquote(distribution["contentUrl"])
-            file_id = raw_contentUrl.split("/")[-1]
-            # with 'cross_bucket=True', the file bucket may be different from org/proj
-            fields = res._store_metadata._project.split("/")
-            file_org = fields[-2]
-            file_project = fields[-1]
+            file_id = raw_contentUrl.split(file_project + separator)[-1]
             file_payload = None
 
             # fetching just the payload of the file, to check first if the file hash
