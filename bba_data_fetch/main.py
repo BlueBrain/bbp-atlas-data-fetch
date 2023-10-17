@@ -631,32 +631,30 @@ def main(args):
         if "distribution" in resource and "contentUrl" in distribution:
             linked_file_extension = distribution["name"].split(".").pop().lower()
 
-            # check that extension of distant file and the output is the same (case not
-            # sensitive)
+            # check that extension of distribution file and the output is the same (case
+            # not sensitive)
             if linked_file_extension != output_extension:
                 logging.error(
-                    f"❌ The provided output extension is .{output_extension} "
-                    f"while the distant file extension is .{linked_file_extension} "
-                    "- They must be the same. "
-                )
+                    f"❌ The provided output extension is .{output_extension} while "
+                    f"the distribution file extension is .{linked_file_extension} "
+                    "- They must be the same. ")
                 exit(1)
 
+            # Fetching the file
             # with 'cross_bucket=True', the file bucket may be different from org/proj
             separator = "/"
             fields = res._store_metadata._project.split(separator)
             file_org = fields[-2]
             file_project = fields[-1]
-            # fetching the file
+            file_bucket = separator.join([file_org, file_project])
+            file_id = distribution["contentUrl"].split(file_bucket + separator)[-1]
             # as of nexusforge 0.8.1, the distribution.contentUrl may contain "%2F"
-            raw_contentUrl = unquote(distribution["contentUrl"])
-            file_id = raw_contentUrl.split(file_project + separator)[-1]
-            file_payload = None
+            raw_file_id = unquote(file_id)
 
             # fetching just the payload of the file, to check first if the file hash
             # is in sync with what is in the payload of the resource (distribution)
             try:
-                file_payload = nexus.files.fetch(
-                    file_org, file_project, file_id)
+                file_payload = nexus.files.fetch(file_org, file_project, raw_file_id)
             except Exception as e:
                 logging.error(f"❌ {e}")
                 exit(1)
@@ -674,7 +672,7 @@ def main(args):
             # fetching the actual file (no longer only the payload)
             try:
                 nexus.files.fetch(
-                    file_org, file_project, file_id, out_filepath=args.out)
+                    file_org, file_project, raw_file_id, out_filepath=args.out)
                 logging.info(f"✅  File saved at {args.out}")
             except Exception as e:
                 logging.error(f"❌ {e}")
