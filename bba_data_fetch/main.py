@@ -520,6 +520,8 @@ def main(args):
         forge = KnowledgeGraphForge(args.forge_config, endpoint=args.nexus_env,
                                     bucket=bucket, token=args.nexus_token)
         res = forge.retrieve(id, cross_bucket=args.cross_bucket)
+        if not res:
+            raise Exception
         resource = forge.as_json(res)
     except Exception as e:
         logging.error("❌ {}".format(e))
@@ -628,12 +630,12 @@ def main(args):
                         f"'{distribution['name']}' as file name by default..."
                     )
 
-        if "distribution" in resource and "contentUrl" in distribution:
+        if "contentUrl" in distribution:
             linked_file_extension = distribution["name"].split(".").pop().lower()
 
             # check that extension of distribution file and the output is the same (case
             # not sensitive)
-            if linked_file_extension != output_extension:
+            if (not os.path.isdir(args.out)) and linked_file_extension != output_extension:
                 logging.error(
                     f"❌ The provided output extension is .{output_extension} while "
                     f"the distribution file extension is .{linked_file_extension} "

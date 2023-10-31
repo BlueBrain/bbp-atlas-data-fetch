@@ -1,3 +1,4 @@
+import os
 import pytest
 import requests
 from bba_data_fetch.main import (
@@ -10,6 +11,8 @@ from bba_data_fetch.main import (
     parse_args,
     main,
 )
+
+test_folder = os.environ["TEST_FOLDER"]
 
 
 def test_randomString():
@@ -164,7 +167,7 @@ def test_translateFilters():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--filter",
         'property.name="data"',
         "resolution.value~=25",
@@ -215,7 +218,7 @@ def test_getFilteredIds():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--filter",
         'property.name="data"',
     ]
@@ -239,7 +242,7 @@ def test_main():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
     ]
 
     with pytest.raises(SystemExit) as e:
@@ -257,7 +260,7 @@ def test_main():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--filter",
         "filter",
         "--nexus-id",
@@ -278,7 +281,7 @@ def test_main():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--nexus-id",
         "id",
     ]
@@ -297,7 +300,7 @@ def test_main():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--filter",
         "filter",
         "--verbose",
@@ -319,7 +322,7 @@ def test_main():
         "--nexus-proj",
         "proj",
         "--out",
-        "tests/",
+        test_folder,
         "--nexus-id",
         "id",
     ]

@@ -19,6 +19,7 @@ unit_test:
   variables:
    SRC_PROJECT: '$CI_PROJECT_PATH'
    TEST_FOLDER: 'tests'
+   NEXUS_STAGING_TOKEN: '$NEXUS_STAGING_TOKEN'
 
 lint_check:
   stage: lint-check
