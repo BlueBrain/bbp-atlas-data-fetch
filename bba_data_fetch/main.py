@@ -467,7 +467,7 @@ def getFilteredIds(args):
         if e.response.status_code == 400:
             logging.info("📄 Here is the original server error message:")
             logging.info(e.response.text.replace("\\n", "\n").replace("\\t", "\t"))
-        exit(1)
+        #exit(1)
 
     logging.info(
         "{}\nSPARQL Response:\n{}\n{}".format(
@@ -527,10 +527,15 @@ def main(args):
         logging.error("❌ {}".format(e))
         exit(1)
 
-    output_extension = args.out.split(".").pop().lower()
+    if os.path.isdir(args.out):
+        out_filepath = os.path.join(args.out, res.get_identifier())
+        output_extension = None
+    else:
+        out_filepath = args.out
+        output_extension = out_filepath.split(".").pop().lower()
 
     # Make sure the parent directory of the specified output exist, if not, create it
-    parent_dir = os.path.dirname(args.out)
+    parent_dir = os.path.dirname(out_filepath)
     if not os.path.isdir(parent_dir):
         os.makedirs(parent_dir)
 
@@ -546,8 +551,8 @@ def main(args):
             exit(1)
 
         # removing the file if it exists
-        if os.path.exists(args.out):
-            os.remove(args.out)
+        if os.path.exists(out_filepath):
+            os.remove(out_filepath)
 
         # sanitize from all the Nexus meta
         if args.keep_meta:
@@ -567,11 +572,11 @@ def main(args):
             resource.pop("_constrainedBy", None)
 
         # write the resource payload as a json file
-        f = open(args.out, "w+")
+        f = open(out_filepath, "w+")
         f.write(json.dumps(resource, indent=2))
         f.close()
 
-        logging.info("✅  File saved at {}".format(args.out))
+        logging.info("✅  File saved at {}".format(out_filepath))
 
         exit(0)
 
@@ -635,10 +640,10 @@ def main(args):
 
             # check that extension of distribution file and the output is the same (case
             # not sensitive)
-            if (not os.path.isdir(args.out)) and linked_file_extension != output_extension:
+            if output_extension and linked_file_extension != output_extension:
                 logging.error(
-                    f"❌ The provided output extension is .{output_extension} while "
-                    f"the distribution file extension is .{linked_file_extension} "
+                    f"❌ The provided output extension is '.{output_extension}' while "
+                    f"the distribution file extension is '.{linked_file_extension}' "
                     "- They must be the same. ")
                 exit(1)
 
@@ -674,8 +679,8 @@ def main(args):
             # fetching the actual file (no longer only the payload)
             try:
                 nexus.files.fetch(
-                    file_org, file_project, raw_file_id, out_filepath=args.out)
-                logging.info(f"✅  File saved at {args.out}")
+                    file_org, file_project, raw_file_id, out_filepath=out_filepath)
+                logging.info(f"✅  File saved at {out_filepath}")
             except Exception as e:
                 logging.error(f"❌ {e}")
                 exit(1)

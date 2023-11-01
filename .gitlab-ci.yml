@@ -3,8 +3,7 @@ include:
     #ref: develop
     file: job-templates.yml
 
-
-image: "python:3.6"
+image: "python:3.8"
 
 stages:
   - unit-test
