@@ -165,6 +165,10 @@ def parse_args(args):
     else:
         logging.basicConfig(format="%(message)s", level=logging.WARNING)
 
+    if os.path.isdir(args.out):
+        logging.info(f"The '--out' argument provided ('{args.out}'), is a directory, "
+            "hence the downloaded file will be saved using the nexus-id as filename.")
+
     if not args.nexus_id and not args.filter:
         logging.error(
             "❌ If the argument --filter is missing, the argument --nexus-id becomes "
@@ -528,7 +532,7 @@ def main(args):
         exit(1)
 
     if os.path.isdir(args.out):
-        out_filepath = os.path.join(args.out, res.get_identifier())
+        out_filepath = os.path.join(args.out, res.get_identifier().replace("/", "_"))
         output_extension = None
     else:
         out_filepath = args.out
