@@ -1,6 +1,6 @@
 """
 Download the file attached to a given resource from Nexus.
-If no file is atatched and the output required is actually the payload, then the 
+If no file is attached and the output required is actually the payload, then the
 output extension must be .json
 """
 
@@ -95,7 +95,7 @@ def parse_args(args):
         required=False,
         default=True,
         help="Option to search the resource id in buckets different from 'org/proj' "
-        "(optional, defauls to True)",
+        "(optional, defaults to True)",
     )
 
     parser.add_argument("--out", dest="out", required=True, help="Output filepath")
@@ -193,12 +193,12 @@ def randomString(stringLength=5):
       :string: The random string
     """
     letters = string.ascii_lowercase
-    return "".join(random.choice(letters) for i in range(stringLength))
+    return "".join(random.choice(letters) for _ in range(stringLength))
 
 
 def extractListIndexFromPropName(prop_name):
     """
-    A property name can refer to an position in a list, such as in "dimension[10]"
+    A property name can refer to a position in a list, such as in "dimension[10]"
     then, the '10' as well as the 'dimension' must be extracted.
     """
 
@@ -209,15 +209,15 @@ def extractListIndexFromPropName(prop_name):
         group_num = 1
         list_index = int(matches.group(group_num))
         prop_name_without_index = prop_name[: matches.start(group_num) - 1]
-        return (prop_name_without_index, list_index)
+        return prop_name_without_index, list_index
     else:
-        return (prop_name, None)
+        return prop_name, None
 
 
 def createRestFirstSequence(list_index):
     """
     In RDF, an element of a @list is addressed with rdf:first and rdf:rest
-    This fuction builds a sequence of /rdf:rest/rdf:rest/.../rdf:first based
+    This function builds a sequence of /rdf:rest/rdf:rest/.../rdf:first based
     on the list_index provided.
     """
     rest = "/rdf:rest"
@@ -264,14 +264,14 @@ def translateFilters(args, context):
         # print("processing filter:", given_filter)
         symbol = None
         symbol_position = -1
-        # checking what symbole is being used for the curent filter
+        # checking what symbol is being used for the current filter
         for s in filter_symbols:
             symbol_position = given_filter.find(s)
             if symbol_position >= 0:
                 symbol = s
                 break
 
-        # if there is no symbole match for this filter, we just ignore this filter
+        # if there is no symbol match for this filter, we just ignore this filter
         # and go to the next one
         if not symbol:
             continue
@@ -286,7 +286,6 @@ def translateFilters(args, context):
                 context_mappers["rdf"] = context["rdf"]
 
             lowercase_prop = prop_name.lower()
-            prop_with_mapping = ""
 
             # if prop in context:
             if lowercase_prop in lowercase_context_lut:
@@ -306,7 +305,7 @@ def translateFilters(args, context):
         value = given_filter[symbol_position + len(symbol):]
         value_type = "string"
 
-        # A value can possibly use a preffix, such as in "mba:997" (Allen CCF brain
+        # A value can possibly use a prefix, such as in "mba:997" (Allen CCF brain
         # region id) If this prefix is in the context, then it is replaced by the
         # actual value
         position_semicolon = value.find(":")
@@ -326,7 +325,7 @@ def translateFilters(args, context):
             try:
                 value = float(value)
                 value_int = int(value)
-                # Check if it's an int or a float, to make sure we dont end up
+                # Check if it's an int or a float, to make sure we don't end up
                 # with a trailing ".0" if the provided value is an int
                 if abs(value - value_int) < sys.float_info.epsilon:
                     value = value_int
@@ -367,7 +366,7 @@ def translateFilters(args, context):
 
         interpreted_filters.append(smarter_filter)
 
-    return (interpreted_filters, context_mappers)
+    return interpreted_filters, context_mappers
 
 
 def buildSparqlQuery(filters, context_mappers, context_when_no_context):
@@ -392,7 +391,6 @@ def buildSparqlQuery(filters, context_mappers, context_when_no_context):
     # add the WHEREs
     q += "WHERE {\n"
     for filter in filters:
-        line = ""
         if filter["value_type"] == "type":
             line = "\t{} a {} .\n".format(select_var_name, filter["value"])
         else:
@@ -401,9 +399,8 @@ def buildSparqlQuery(filters, context_mappers, context_when_no_context):
             )
         q += line
 
-    # add the FITLERs
+    # add the FILTERs
     for filter in filters:
-        line = ""
         if filter["value_type"] == "type":
             continue
 
@@ -434,14 +431,14 @@ def buildSparqlQuery(filters, context_mappers, context_when_no_context):
 
 
 def getFilteredIds(args):
-    # fetching the full context to lookup the context mappings
+    # fetching the full context to look up the context mappings
     context_payload = nexus.resources.fetch(
         "neurosciencegraph", "datamodels", "https://neuroshapes.org"
     )
 
     # stealing the context from the context payload. Could be @context or an element of
     # it if it happens to be a list. We just take the first one in this case. (not
-    # bulletproof but ssince this resource is under the control of DKE, we will know
+    # bulletproof but since this resource is under the control of DKE, we will know
     # if it changes...)
     context = None
     if isinstance(context_payload["@context"], dict):
@@ -519,6 +516,8 @@ def main(args):
         id = ids[0]
 
     # Fetching the resource of interest
+    res = None
+    resource = None
     try:
         bucket = "/".join([args.nexus_org, args.nexus_proj])
         forge = KnowledgeGraphForge(args.forge_config, endpoint=args.nexus_env,
@@ -612,7 +611,7 @@ def main(args):
                     )
                 if len(distrib_found) > 1:
                     logging.warning(
-                        "⚠️  More than one distribution has a correspondance with "
+                        "⚠️  More than one distribution has a correspondence with "
                         "the --favor arguments values."
                     )
                     logging.info(
@@ -631,7 +630,7 @@ def main(args):
                     logging.warning("⚠️  --flavor argument has not been provided.")
                 else:
                     logging.warning(
-                        "⚠️  No distribution has a correspondance with a provided "
+                        "⚠️  No distribution has a correspondence with a provided "
                         "--favor argument."
                     )
                     logging.info(
@@ -664,6 +663,7 @@ def main(args):
 
             # fetching just the payload of the file, to check first if the file hash
             # is in sync with what is in the payload of the resource (distribution)
+            file_payload = None
             try:
                 file_payload = nexus.files.fetch(file_org, file_project, raw_file_id)
             except Exception as e:
