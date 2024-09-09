@@ -1,44 +1,33 @@
-This documentation is also available on [Confluence](https://bbpteam.epfl.ch/project/spaces/display/BBKG/blue_brain_atlas_data_fetch).
-
 ## Description
-This module is a (Python) CLI in charge of fetching datasets from Nexus, one file (or payload) at the time. It can fetch payloads and save them as JSON files or it can fetch binaries (_distributions_) linked to resources.
+This module is a (Python) CLI in charge of fetching datasets from Nexus, one file (or 
+payload) at the time. It can fetch payloads and save them as JSON files, or it can fetch 
+binaries (_distributions_) linked to resources.
 
 There is mainly two ways of fetching a piece of data:
 - using the @id of a resource
-- using filters on the resource properties to narrow down the selection and eventually find the relevant dataset
+- using filters on the resource properties to narrow down the selection and eventually 
+find the relevant dataset
 
-When using filters (see below), a SPARQL query is dynamically generated, allowing graph traversal.
-
-## Source
-You can find the source of this module here: [https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch](https://bbpgitlab.epfl.ch/dke/apps/blue_brain_nexus_token_fetch)
+When using filters (see below), a SPARQL query is dynamically generated, allowing graph 
+traversal.
 
 ## Install
-Clone the repository:
 ```
-git clone https://bbpgitlab.epfl.ch/dke/apps/blue_brain_atlas_data_fetch.git
+pip install "bba-data-fetch"
 ```
+From now on, the executable **bba-data-fetch** is in your PATH.
 
-And install with pip:
-```
-cd blue_brain_atlas_data_fetch
-pip install .
-```
-From now on, the executable **bba-datafetch** is in your PATH.
+## Usage
+### Inputs
+There is no input apart from configuration and filter/id. See the [CLI arguments](#cli-arguments)
+section for more info.
 
-## Dependencies
-Here is the list of Python dependencies:
-- [nexus-sdk](https://pypi.org/project/nexus-sdk/)
-Though this will be installed by pip automatically.
+### Outputs
+This CLI writes on disc one of the two depending on the arguments provided:
+- a JSON file that corresponds to the targeted resource payload,
+- a copy of the distribution file linked in the targeted resource (can be any kind of file).
 
-## Inputs
-There is no input apart from configuration and filter/id. See the **CLI arguments** section for more info.
-
-## Outputs
-This CLI write on disc one of the two depending on the arguments provided:
-- a JSON file that corresponds to the targeted resource payload
-- a copy of the distribution file linked in the targeted resource. Could be any kind of file
-
-## CLI arguments
+### CLI arguments
 - **--version** - [flag] Display the version
 - **--help** - [flag] Display help
 - **--verbose** - [flag] Enables verbose mode to print the generated SPARQL query and response
@@ -54,9 +43,10 @@ This CLI write on disc one of the two depending on the arguments provided:
 - **--tag some_tag** - [single string] The tag argument is mainly to be used along **--nexus-id** to fetch a specific tag of a given resource. Optional
 - **--filter prop1=1 prop2=20** - [multiple strings] Filters are to be used instead of --nexus-id if the @id is not known. Filters are applied on properties and can work with graph traversal. Optional but necessary of **--nexus-id** is not provided
 
-## Filters
+### Filters
 The **--filter** argument is powerful and deserves its own paragraph.  
-Using filters keeps only the resources that match the conditions. each filter takes this shape:
+Using filters keeps only the resources that match the conditions. Each filter takes this
+shape:
 
 property name [ operator ] value to compare with
 
@@ -88,7 +78,7 @@ Example: --filter _"resolution.value>=25" name="hello world" "another.prop=bip b
 
 Under the hood, this is using _rdf:first_ and _rdf:rest_.
 
-## Examples
+### Examples
 - Fetch a resource payload from its `@id`:
 ```
 bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
@@ -178,7 +168,14 @@ bba-data-fetch --nexus-env https://bbp.epfl.ch/nexus/v1/ \
                    brainLocation.brainRegion="mba:1048" \
 ```
 
-Note that _mba:1048_ is the id of a brain region (Allen CCF 1048 is the gigantocellular reticular nucleus) preceded by _mba_, which is the prefix in the graph database (_mba_=mouse brain atlas). This means that prefixes can be used in values if need be.
+Note that _mba:1048_ is the id of a brain region (Allen CCF 1048 is the "gigantocellular
+reticular nucleus") preceded by _mba_, which is the prefix in the graph database 
+(_mba_ = mouse brain atlas). This means that prefixes can be used in values if need be.
 
-## Maintainers
-This module was originally created by Jonathan Lurie, DKE (jonathan.lurie@epfl.ch) and Nabil Alibou, DKE (nabil.alibou@epfl.ch).
+
+## Funding & Acknowledgment
+The development of this software was supported by funding to the Blue Brain Project, a 
+research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss 
+government’s ETH Board of the Swiss Federal Institutes of Technology.
+
+Copyright © 2020-2024 Blue Brain Project/EPFL

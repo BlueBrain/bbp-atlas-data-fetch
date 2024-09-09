@@ -11,7 +11,8 @@
 # Add your pinned requirements so that they can be easily installed with:
 # pip install -r requirements.txt
 # Remember to also add them in setup.cfg but unpinned.
-# Example:
-# numpy==1.13.3
-# scipy==1.0
-#
+nexus-sdk>=0.3.2
+click>=7.0
+numpy>=1.19
+pynrrd>=0.4.0
+nexusforge>=0.8.1
